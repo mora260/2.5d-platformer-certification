@@ -28,30 +28,38 @@ public class Player : MonoBehaviour
     }
 
     private void CalculateMovement() {
+        Vector3 movement = HorizontalMovement();
+        CheckJump();
+        ApplyGravity();
+        movement.y=_yVelocity;
+        _cc.Move(movement * Time.deltaTime);
+    }
+
+    private void FixedUpdate() {
         if (_cc.isGrounded) {
             _yVelocity = 0;
             _recentlyGrounded = 0.3f;
         }
-
-        float direction = Input.GetAxis("Horizontal");
-        Vector3 movement = new Vector3(0, 0, direction) * _speed;
-
-        if (_recentlyGrounded >= 0 && Input.GetButtonDown("Jump")) {
-            _yVelocity = Mathf.Sqrt(_jumpHeight * -2.0f * _gravity);
-        }
-
-        ApplyGravity(ref movement);
-        _cc.Move(movement * Time.deltaTime);
-
         if (_recentlyGrounded > 0) {
             _recentlyGrounded-=Time.deltaTime;
         }
     }
 
-    private void ApplyGravity(ref Vector3 movement) {
+    private Vector3 HorizontalMovement() {
+        float direction = Input.GetAxis("Horizontal");
+        Vector3 movement = new Vector3(0, 0, direction) * _speed;
+        return movement;
+    }
+
+    private void ApplyGravity() {
         if (_cc.isGrounded == false) {
             _yVelocity+= _gravity * Time.deltaTime;
-            movement.y=_yVelocity;
+        }
+    }
+
+    private void CheckJump() {
+        if (_recentlyGrounded > 0 && Input.GetButtonDown("Jump")) {
+            _yVelocity = Mathf.Sqrt(_jumpHeight * -2.0f * _gravity);
         }
     }
 }
